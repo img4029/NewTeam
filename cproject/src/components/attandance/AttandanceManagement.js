@@ -20,6 +20,9 @@ function AttandanceMangement() {
 
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
+    
+    // 권한 에러 확인용
+    const [authErr, setAuthErr] = useState();
 
     // 출석일자 카운팅 해야함 : 필요없다
     // const [attCount, setAttCount] = useState();
@@ -86,6 +89,12 @@ function AttandanceMangement() {
             });
     };
 
+    // 첫 authErr의 상태값 변경 후 alert창을 띄워주기 위함
+    useEffect(() => {
+        if (authErr === 403) {
+            alert("변경 권한이 없습니다.");
+        }
+    }, [authErr]);
 
     // 관리자 페이지 체크 후 결석 데이터 요청
     const handleAttendanceRegistration = () => {
@@ -129,15 +138,19 @@ function AttandanceMangement() {
                     // console.log(updatedAttData);
                 })
                 .catch(error => {
+                    setAuthErr(error);  // 에러의 상태값 변경
                     console.error('출석 상태 변경 실패:', error);
-                    if (error === 403) alert("권한이 없습니다. ");
-                    // else alert("서버 통신 에러로 요청에 실패했습니다.");
                 });
-
         });
+        
         setMemListUpdate(!memListUpdate);
         alert("출석등록하시겠습니까?")
     };
+
+    function authorityErrAlert(){
+        console.log(authErr);
+        if(authErr === 403 ) alert("변경 권한이 없습니다.");
+    }
 
     // 출석 리스트(입소리스트) & 리스트 별 출석 현황 요청
     useEffect(() => {
@@ -380,7 +393,9 @@ function AttandanceMangement() {
             </div>
             <div className='buttonBox attButton'>
                 <div>
-                    <button type="submit" value='출석등록' onClick={handleAttendanceRegistration}>{format(currentMonth, 'dd')}일 출석 등록</button>
+
+                    <button type="submit" value='출석등록' onClick={() => { handleAttendanceRegistration({}); authorityErrAlert()} }>{format(currentMonth, 'dd')}일 출석 등록</button>
+                    {/* <button type="reset" onClick={() => { setData({}); setEduDataOne({}) }}>입력취소</button> */}
                     {/* <button type="submit" value='출석삭제'>출석 삭제</button> */}
                 </div>
             </div>
